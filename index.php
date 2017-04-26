@@ -1,68 +1,71 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: forvoid
- * Date: 3/29/2017
- * Time: 9:54 AM
- */
+/*
+    方倍工作室 http://www.cnblogs.com/txw1958/
+    CopyRight 2013 www.fangbei.org  All Rights Reserved
+*/
+header('Content-type:text');
 define("TOKEN", "weixin");
 $wechatObj = new wechatCallbackapiTest();
 if (isset($_GET['echostr'])) {
     $wechatObj->valid();
-}else {
-    $wechatObj->responseMsg();
+}else{
+    $wechatObj-> responseMsg();
 }
 
-class wechatCallBackapiTest
+class wechatCallbackapiTest
 {
-    public function vaild()
+    public function valid()
     {
-        $echostr = $_GET["echostr"];
-        if ($this -> checkSignature()) {
-            echo $echostr;
+        $echoStr = $_GET["echostr"];
+        if($this->checkSignature()){
+            header('content-type:text');
+            echo $echoStr;
             exit;
         }
     }
+
     private function checkSignature()
     {
         $signature = $_GET["signature"];
-        $timestap = $_GET["timestamp"];
+        $timestamp = $_GET["timestamp"];
         $nonce = $_GET["nonce"];
 
         $token = TOKEN;
-        $tmpArr = array($token, $timestap, $nonce);
-        sort($tmpArr);
-        $tempStr = implode($tmpArr);
-        $tempStr = sha1($tempStr);
+        $tmpArr = array($token, $timestamp, $nonce);
+        sort($tmpArr, SORT_STRING);
+        $tmpStr = implode( $tmpArr );
+        $tmpStr = sha1( $tmpStr );
 
-        if ($tempStr == $signature){
+        if( $tmpStr == $signature ){
             return true;
         }else{
             return false;
         }
-
     }
-    public function responseMsg(){
+
+    public function responseMsg()
+    {
         $postStr = $GLOBALS["HTTP_RAW_POST_DATA"];
+
         if (!empty($postStr)){
             $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
             $fromUsername = $postObj->FromUserName;
             $toUsername = $postObj->ToUserName;
-            $keyword = trime($postObj -> Content);
+            $keyword = trim($postObj->Content);
             $time = time();
             $textTpl = "<xml>
-                        <ToUerName><![CDATA[%s]]></ToUerName>
+                        <ToUserName><![CDATA[%s]]></ToUserName>
                         <FromUserName><![CDATA[%s]]></FromUserName>
                         <CreateTime>%s</CreateTime>
                         <MsgType><![CDATA[%s]]></MsgType>
                         <Content><![CDATA[%s]]></Content>
                         <FuncFlag>0</FuncFlag>
                         </xml>";
-            if ($keyword == "?" || $keyword == "?")
+            if($keyword == "?" || $keyword == "？")
             {
                 $msgType = "text";
-                $contenStr = date("Y-m-d : H:i:s", time());
-                $resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contenStr);
+                $contentStr = date("Y-m-d H:i:s",time());
+                $resultStr = sprintf($textTpl, $fromUsername, $toUsername, $time, $msgType, $contentStr);
                 echo $resultStr;
             }
         }else{
@@ -71,3 +74,4 @@ class wechatCallBackapiTest
         }
     }
 }
+?>
